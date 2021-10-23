@@ -1,7 +1,7 @@
 <div align="center">
   <h1>
     <br>
-    <a href=""><img src="server.jpeg" alt="Favicon" width="200"></a>
+    <a href=""><img src="server.jpg" alt="Favicon" width="200"></a>
     <br>
     Formulaire d'authentification basique
     <br>
