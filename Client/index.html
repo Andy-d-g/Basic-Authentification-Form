@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+
+<html lang='fr'>
+    <head>
+        <title>Formulaire d'authentification</title>
+        <meta charset='utf-8'>
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body>
+        <main class='center'>
+            <div class="block">
+                <h2>Formulaire : creation / login</h2>
+                <input type='text' id='email' class="input-txt" placeholder="E-mail">
+                <br>
+                <p class="error-txt error-email hide">L'email n'est pas valide</p>
+                <br>
+                <input type="password" id='password' class="input-txt" placeholder='Password'>
+                <br>
+                <ul class="error-password hide">
+                    <li class="red">
+                        Length >= 8
+                    </li>
+                    <li class="red">
+                        Majuscule >= 1
+                    </li>
+                        <li class="red">
+                        Minuscule >= 1
+                    </li>
+                    <li class="red">
+                        Number >= 1
+                        </li>
+                    <li class="red">
+                        Caracteres special >= 1
+                    </li>
+                </ul>
+                <br>
+                <input id='send' type="button" value='Continuer' class="input-btn">
+                <br>
+                <p id="response"></p>
+            </div>
+        </main>       
+    </body>
+    <script src='script.js'></script>
+</html>
