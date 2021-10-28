@@ -1,7 +1,17 @@
-const express = require('express')
-const cors = require('cors')
-const fs = require('fs')
+import express from 'express'
+import Database from './database.js';
+import cors from 'cors';
+import helmet from 'helmet'
+import rateLimit from 'express-rate-limit';
+
 const PORT = 3000
+const DB_NAME = 'database.json'
+const DB_ENCODING = 'utf-8'
+
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, 
+    max: 100 
+  });
 
 class Server {
     constructor (port) {
@@ -9,47 +19,39 @@ class Server {
         this.app = express()
         this.init()
         this.listen(port)
+        this.database = new Database(DB_NAME, DB_ENCODING)
     }
     
     router = () => {
-        this.app.post('/', (req, res) => {
-            const databaseName = 'database.json'
-            const databaseEncoding = 'utf-8'
-            const email = req.body.email
-            const password = req.body.password
-            const database = JSON.parse(fs.readFileSync(databaseName, databaseEncoding))
+        this.app.post('/', async (req, res) => {
+            const email = encodeURI(req.body.email)
+            const password = encodeURI(req.body.password)
 
-            const verifyData = (mail, pwd) => {
+            const checkInput = () => {
                 let reg = [/^.{8,}$/ , /^(.*[A-Z].*)$/, /^(.*[a-z].*)$/, /^(.*\d.*)$/, /^(.*[!@#\$%\^&\*].*)$/]
                 
                 for (let i = 0; i < reg.length; i++) {
-                    if (!reg[i].test(pwd)) {
+                    if (!reg[i].test(password)) {
                         return false;
                     } 
                 }
                 reg = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-                return reg.test(String(mail).toLowerCase())
+                return reg.test(String(email).toLowerCase())
             }
 
-            let msg = 'Les informations fournis ne sont pas correct'
+            let msg = 'Bad informations';
 
-            if (verifyData(email, password)) {
-                for (const account of database.accounts) {
-                    if (account.email === email) {
-                        if (account.password === password) msg = 'Good password'
-                        else msg = 'Bad password'
-                    } else msg = 'The account does\'t exist : creation done'
+            if (checkInput()) {
+                try {
+                    const user = await this.database.getUser(email, password)
+                    msg = this.database.verifyPassword(password, user.password)
+                        ? 'Password : ok'
+                        : 'Password : ko'
+                } catch (err) {
+                    this.database.addUser(email, password)
+                    msg = 'Account created'
                 }
-    
-                if (msg === 'The account does\'t exist : creation done') {
-                    database.accounts.push({
-                        email: email,
-                        password: password
-                    })
-                    fs.writeFileSync(databaseName, JSON.stringify(database, null, 4), databaseEncoding)
-                }     
             }
-            
    
             res.json({response : msg})
         })
@@ -59,6 +61,8 @@ class Server {
         this.app.use(cors())
         this.app.use(express.json());
         this.app.use(express.urlencoded({extended: true}));
+        this.app.use(helmet())
+        this.app.use(limiter);
         this.router()
     }
 
