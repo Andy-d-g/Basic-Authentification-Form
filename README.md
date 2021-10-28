@@ -20,20 +20,23 @@ Le but de ce code est de créer un formulaire d'authentification simple avec un 
 
 ## Technologie utilisé
 
-##### Client
+Client : 
+```
+VanillaJS
+```
 
-Rien
-
-##### Server
-
-Environnement : NodeJS
-Package : 
-  - expressJS
-  - cors
-  - helmet
-  - express-rate-limit
-  - bcrypt
-
+Server :
+```
+  # Environnement : 
+    - NodeJS
+  
+  # Package : 
+    - expressJS
+    - cors
+    - helmet
+    - express-rate-limit
+    - bcrypt
+```
 ## Installation
 
 Depuis votre terminal de commande : 
