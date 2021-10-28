@@ -10,7 +10,8 @@
 
 <div align="center">
   <a href="#a-propos">A propos</a> •
-  <a href="#installation">Installation</a> 
+  <a href="#installation">Installation</a> •
+  <a href="#technologies">Technologie utilisé</a> 
 </div>
 
 # A propos
@@ -18,7 +19,7 @@
 Ce repository est composé d'un serveur et d'un client.
 Le but de ce code est de créer un formulaire d'authentification simple avec un peu de sécurité
 
-## Technologie utilisé
+## Technologies
 
 Client : 
 ```
