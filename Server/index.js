@@ -11,7 +11,25 @@ const DB_ENCODING = 'utf-8'
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, 
     max: 100 
-  });
+});
+
+const checkInput = (email, password) => {
+    let reg = [/^.{8,}$/ , /^(.*[A-Z].*)$/, /^(.*[a-z].*)$/, /^(.*\d.*)$/, /^(.*[!@#\$%\^&\*].*)$/]
+    
+    for (let i = 0; i < reg.length; i++) {
+        if (!reg[i].test(password)) {
+            return false;
+        } 
+    }
+    reg = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return reg.test(String(email).toLowerCase())
+}
+
+const standardizeInput = (req, res, next) => {
+    req.body.email = encodeURI(req.body.email)
+    req.body.password = encodeURI(req.body.password)
+    next()
+}
 
 class Server {
     constructor (port) {
@@ -23,34 +41,38 @@ class Server {
     }
     
     router = () => {
-        this.app.post('/', async (req, res) => {
-            const email = encodeURI(req.body.email)
-            const password = encodeURI(req.body.password)
-
-            const checkInput = () => {
-                let reg = [/^.{8,}$/ , /^(.*[A-Z].*)$/, /^(.*[a-z].*)$/, /^(.*\d.*)$/, /^(.*[!@#\$%\^&\*].*)$/]
-                
-                for (let i = 0; i < reg.length; i++) {
-                    if (!reg[i].test(password)) {
-                        return false;
-                    } 
-                }
-                reg = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-                return reg.test(String(email).toLowerCase())
-            }
+        this.app.post('/login', async (req, res) => {
+            const email = req.body.email
+            const password = req.body.password
 
             let msg = 'Bad informations';
 
-            if (checkInput()) {
-                try {
-                    const user = await this.database.getUser(email, password)
+            if (checkInput(email, password)) {
+                const user = await this.database.getUser(email, password)
+                if (user) {
                     msg = this.database.verifyPassword(password, user.password)
                         ? 'Password : ok'
                         : 'Password : ko'
-                } catch (err) {
+                }
+                else msg = 'Password : ko'
+            }
+   
+            res.json({response : msg})
+        })
+
+        this.app.post('/signin', async (req, res) => {
+            console.log('ici')
+            const email = encodeURI(req.body.email)
+            const password = encodeURI(req.body.password)
+
+            let msg = 'Bad informations';
+
+            if (checkInput(email, password)) {
+                const user = await this.database.getUser(email, password)
+                if (!user) {
                     this.database.addUser(email, password)
                     msg = 'Account created'
-                }
+                } else msg = 'Account already exist'
             }
    
             res.json({response : msg})
@@ -63,10 +85,11 @@ class Server {
         this.app.use(express.urlencoded({extended: true}));
         this.app.use(helmet())
         this.app.use(limiter);
+        this.app.use(standardizeInput)
         this.router()
     }
 
-    listen(port) {
+    listen = (port) => {
         this.app.listen(port, () => {
             console.log(`App listening at http://localhost:${port}`)
         })

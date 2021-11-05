@@ -1,4 +1,4 @@
-const URL = 'http://localhost:3000/';
+const URL = 'http://localhost:3000/signin/';
 
 let response = document.getElementById('response')
 let password = document.getElementById('password')

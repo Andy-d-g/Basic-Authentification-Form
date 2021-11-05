@@ -25,7 +25,7 @@ class Database {
                 return account;
             }
         }
-        throw new Error('Unknow email')
+        return undefined
     }
 
     verifyPassword = (password, hashPassword) => {
