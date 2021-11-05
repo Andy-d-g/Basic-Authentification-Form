@@ -36,7 +36,7 @@ Server :
     - cors
     - helmet
     - express-rate-limit
-    - bcrypt
+    - bcryptjs
 ```
 ## Installation
 
