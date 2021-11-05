@@ -1,5 +1,7 @@
 import fs from 'fs'
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcryptjs'
+
+require('dotenv').config()
 
 class Database {
     constructor (db_name, db_encoding) {
