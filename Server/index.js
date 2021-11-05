@@ -13,6 +13,11 @@ const limiter = rateLimit({
     max: 100 
 });
 
+const corsOption = {
+    optionsSuccessStatus: 200,
+    methods: "POST"
+}
+
 const checkInput = (email, password) => {
     let reg = [/^.{8,}$/ , /^(.*[A-Z].*)$/, /^(.*[a-z].*)$/, /^(.*\d.*)$/, /^(.*[!@#\$%\^&\*].*)$/]
     
@@ -41,6 +46,23 @@ class Server {
     }
     
     router = () => {
+        this.app.post('/signin', async (req, res) => {
+            const email = req.body.email
+            const password = req.body.password
+
+            let msg = 'Bad informations';
+
+            if (checkInput(email, password)) {
+                const user = await this.database.getUser(email, password)
+                if (!user) {
+                    this.database.addUser(email, password)
+                    msg = 'Account created'
+                } else msg = 'Account already exist'
+            }
+   
+            res.json({response : msg})
+        })
+
         this.app.post('/login', async (req, res) => {
             const email = req.body.email
             const password = req.body.password
@@ -59,28 +81,10 @@ class Server {
    
             res.json({response : msg})
         })
-
-        this.app.post('/signin', async (req, res) => {
-            console.log('ici')
-            const email = encodeURI(req.body.email)
-            const password = encodeURI(req.body.password)
-
-            let msg = 'Bad informations';
-
-            if (checkInput(email, password)) {
-                const user = await this.database.getUser(email, password)
-                if (!user) {
-                    this.database.addUser(email, password)
-                    msg = 'Account created'
-                } else msg = 'Account already exist'
-            }
-   
-            res.json({response : msg})
-        })
     }
 
     init = () => {
-        this.app.use(cors())
+        this.app.use(cors(corsOption))
         this.app.use(express.json());
         this.app.use(express.urlencoded({extended: true}));
         this.app.use(helmet())
