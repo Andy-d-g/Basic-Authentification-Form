@@ -57,7 +57,7 @@ $ npm i
 $ npm run start
 
 # Ouvrir la page web [ /Client ]
-$ open index.html (macOS)
+$ open signin.html (macOS)
 
 ```
 ## Contributeurs
